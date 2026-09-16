@@ -1,0 +1,3 @@
+Before reading this chapter, I tend to think of game rules as a fixed structure that dictates what players can do and cannot do according to developer's thought. I have often believed that creating something new must adding new mechanics or features. However, Pippin Barr's experiments with PONGS made me re-think the idea. I was fascinated by how such a minor change to the rules could completely affect player's experience.
+
+For example, Ghost Pong removes the collision between the paddle and the ball. Although player can still able to move, but their actions no longer have any real impact to the game. I realized that player's agency actually relies heavily on rules we don't even notice in our daily lives.
