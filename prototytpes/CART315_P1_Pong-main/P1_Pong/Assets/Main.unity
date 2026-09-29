@@ -1787,7 +1787,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc6b401aad6db094c8d34ffff1613852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ball
-  speed: 100
+  speed: 150
   speedIncreasePerHit: 0.1
   maxSpeedMultiplier: 3
 --- !u!61 &1233802268

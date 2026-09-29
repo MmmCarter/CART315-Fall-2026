@@ -22,6 +22,12 @@ public class Ball : MonoBehaviour
     [Min(1f)]
     public float maxSpeedMultiplier = 3f;
 
+    // Bounce angle
+    [Header("Bounce Angle")]
+    [Tooltip("Maximum bounce angle measured from horizontal.")]
+    [Range(0f, 70f)]
+    public float maxBounceAngle = 60f;
+
     private void Awake()
     {
         _rigidBody = GetComponent<Rigidbody2D>();
@@ -66,38 +72,39 @@ public class Ball : MonoBehaviour
         if (paddle == null) return;
         if (_currentSpeed <= 0f) return;
 
+        Collider2D paddleCollider = collision.collider;
+
+        // Bounds account for paddle's size and scale.
+        Bounds bounds = paddleCollider.bounds;
+        float halfHeight = bounds.extents.y;
+
+        if (halfHeight <= 0.0001f) return;
+
+        // Hit position
+        float hitPosition = Mathf.Clamp(
+        (_rigidBody.position.y - bounds.center.y) / halfHeight,
+        -1f,
+        1f
+   );
+
+        float angle = hitPosition
+                  * Mathf.Clamp(maxBounceAngle, 0f, 70f)
+                  * Mathf.Deg2Rad;
+
+        // Send ball away from the paddle.
+        float horizontalDirection =
+        _rigidBody.position.x >= bounds.center.x ? 1f : -1f;
+
+        Vector2 direction = new Vector2(
+        Mathf.Cos(angle) * horizontalDirection,
+        Mathf.Sin(angle)
+   );
+
+        // Keep existing accleration and speed limit
         _currentSpeed = Mathf.Min(
        _currentSpeed * (1f + Mathf.Max(0f, speedIncreasePerHit)),
        _roundSpeedLimit
    );
-
-        Vector2 velocity = _rigidBody.linearVelocity;
-
-        float horizontalDirection =
-        transform.position.x >= paddle.transform.position.x ? 1f : -1f;
-
-        Vector2 direction = velocity.sqrMagnitude > 0.0001f
-            ? velocity.normalized
-            : new Vector2(horizontalDirection, 0f);
-
-        // Maximum angle from horizontal
-        const float minHorizontalComponent = 0.5f;
-
-        float horizontal = Mathf.Max(
-            Mathf.Abs(direction.x),
-            minHorizontalComponent
-        );
-
-        float vertical = Mathf.Sqrt(
-            Mathf.Max(0f, 1f - horizontal * horizontal)
-        );
-
-        float verticalDirection = direction.y >= 0f ? 1f : -1f;
-
-        direction = new Vector2(
-            horizontalDirection * horizontal,
-            verticalDirection * vertical
-        );
 
         _rigidBody.linearVelocity = direction * _currentSpeed;
     }
