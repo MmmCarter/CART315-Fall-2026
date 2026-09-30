@@ -3,20 +3,54 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    private Vector2 _direction;
-
     public Paddle paddle;
+
+    // Key to control the game
+    public enum ControlScheme
+    {
+        WS,
+        ArrowKeys
+    }
+
+    public ControlScheme controls = ControlScheme.WS;
 
     // Update is called once per frame
     private void Update()
     {
-        _direction = Vector2.zero;
+        if (paddle == null) return;
+        Vector2 direction = Vector2.zero;
+        Keyboard keyboard = Keyboard.current;
 
-        if (Keyboard.current.wKey.isPressed)
-            _direction = Vector2.up;
-        else if (Keyboard.current.sKey.isPressed)
-            _direction = Vector2.down;
+        if (keyboard != null)
+        {
+            bool upPressed;
+            bool downPressed;
 
-        paddle.direction = _direction;
+            if (controls == ControlScheme.WS)
+            {
+                upPressed = keyboard.wKey.isPressed;
+                downPressed = keyboard.sKey.isPressed;
+            }
+
+            else
+            {
+                upPressed = keyboard.upArrowKey.isPressed;
+                downPressed = keyboard.downArrowKey.isPressed;
+            }
+
+            // Pressing both directions will cancel movement input.
+            float vertical =
+                    (upPressed ? 1f : 0f) - (downPressed ? 1f : 0f);
+
+            direction = new Vector2(0f, vertical);
+        }
+
+        paddle.direction = direction;
+    }
+
+    private void OnDisable()
+    {
+        if (paddle != null)
+            paddle.direction = Vector2.zero;
     }
 }
