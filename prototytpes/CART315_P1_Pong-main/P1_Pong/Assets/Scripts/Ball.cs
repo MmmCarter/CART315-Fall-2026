@@ -28,12 +28,27 @@ public class Ball : MonoBehaviour
     [Range(0f, 70f)]
     public float maxBounceAngle = 60f;
 
+    // Power shot
+    [Header("Power Shot")]
+    [Min(1f)]
+    public float powerShotMultiplier = 1.5f;
+
+    public TrailRenderer powerTrail;
+
     private void Awake()
     {
         _rigidBody = GetComponent<Rigidbody2D>();
 
         // Reduce the risk of passing through colliders at high speed.
         _rigidBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        if (powerTrail != null)
+        {
+            powerTrail.widthMultiplier = 1f;
+            powerTrail.widthCurve = AnimationCurve.Linear(0f, 0.18f,1f, 0f);
+            powerTrail.emitting = false;
+            powerTrail.Clear();
+        }
 
     }
 
@@ -46,6 +61,12 @@ public class Ball : MonoBehaviour
         // Clear acceleration from the previous round.
         _currentSpeed = 0f;
         _roundSpeedLimit = 0f;
+
+        if (powerTrail != null)
+        {
+            powerTrail.emitting = false;
+            powerTrail.Clear();
+        }
 
     }
 
@@ -72,41 +93,67 @@ public class Ball : MonoBehaviour
         if (paddle == null) return;
         if (_currentSpeed <= 0f) return;
 
-        Collider2D paddleCollider = collision.collider;
-
-        // Bounds account for paddle's size and scale.
-        Bounds bounds = paddleCollider.bounds;
+        Bounds bounds = collision.collider.bounds;
         float halfHeight = bounds.extents.y;
 
         if (halfHeight <= 0.0001f) return;
 
-        // Hit position
+        // Hit position determines the bounce angle.
         float hitPosition = Mathf.Clamp(
-        (_rigidBody.position.y - bounds.center.y) / halfHeight,
-        -1f,
-        1f
-   );
+            (_rigidBody.position.y - bounds.center.y) / halfHeight,
+            -1f,
+            1f
+        );
 
         float angle = hitPosition
-                  * Mathf.Clamp(maxBounceAngle, 0f, 70f)
-                  * Mathf.Deg2Rad;
+                      * Mathf.Clamp(maxBounceAngle, 0f, 70f)
+                      * Mathf.Deg2Rad;
 
-        // Send ball away from the paddle.
         float horizontalDirection =
-        _rigidBody.position.x >= bounds.center.x ? 1f : -1f;
+            _rigidBody.position.x >= bounds.center.x ? 1f : -1f;
 
         Vector2 direction = new Vector2(
-        Mathf.Cos(angle) * horizontalDirection,
-        Mathf.Sin(angle)
-   );
+            Mathf.Cos(angle) * horizontalDirection,
+            Mathf.Sin(angle)
+        );
 
-        // Keep existing accleration and speed limit
+        // Track ordinary rally speed separately from the temporary boost.
         _currentSpeed = Mathf.Min(
-       _currentSpeed * (1f + Mathf.Max(0f, speedIncreasePerHit)),
-       _roundSpeedLimit
-   );
+            _currentSpeed * (1f + Mathf.Max(0f, speedIncreasePerHit)),
+            _roundSpeedLimit
+        );
 
-        _rigidBody.linearVelocity = direction * _currentSpeed;
+        PaddleEnergy energy = paddle.GetComponent<PaddleEnergy>();
+
+        bool powered = energy != null && energy.TryConsumePower();
+
+        if (energy != null && !powered)
+            energy.GainEnergy();
+
+        float outgoingSpeed = _currentSpeed;
+
+        if (powered)
+            outgoingSpeed *= Mathf.Max(1f, powerShotMultiplier);
+
+        _rigidBody.linearVelocity = direction * outgoingSpeed;
+
+        // Each paddle hit ends the previous shot's trail.
+        if (powerTrail != null)
+        {
+            powerTrail.emitting = false;
+            powerTrail.Clear();
+
+            if (powered)
+            {
+                Color color = energy.powerColor;
+
+                powerTrail.startColor = color;
+                powerTrail.endColor =
+                    new Color(color.r, color.g, color.b, 0f);
+
+                powerTrail.emitting = true;
+            }
+        }
     }
 
 }
