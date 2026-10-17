@@ -20,8 +20,19 @@
               "icon": "lucide-file",
               "title": "Reflective Journal - Prototype 1"
             }
+          },
+          {
+            "id": "73fe29cc6228a7c4",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -188,7 +199,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "393c457245040c6c",
+  "active": "73fe29cc6228a7c4",
   "lastOpenFiles": [
     "Reflective Journal - Prototype 1.md"
   ]
