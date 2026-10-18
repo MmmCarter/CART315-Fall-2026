@@ -89,11 +89,20 @@ public class Food : MonoBehaviour
         // Collect the squares not occupied by tickets, and make sure items don't spawn on the snake.
         var freeCells = new System.Collections.Generic.List<Vector2Int>();
 
+        CheckoutPoint checkout = FindFirstObjectByType<CheckoutPoint>();
+
+        Collider2D checkoutCollider = checkout != null
+            ? checkout.GetComponent<Collider2D>()
+            : null;
+
         for (int y = minY; y <= maxY; y++)
         {
             for (int x = minX; x <= maxX; x++)
             {
-                if (!snake.Occupies(x, y))
+                bool insideCheckout = checkoutCollider != null &&
+    checkoutCollider.OverlapPoint(new Vector2(x, y));
+
+                if (!snake.Occupies(x, y) && !insideCheckout)
                 {
                     freeCells.Add(new Vector2Int(x, y));
                 }

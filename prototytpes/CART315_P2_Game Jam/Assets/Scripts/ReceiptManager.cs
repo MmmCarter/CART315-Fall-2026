@@ -11,10 +11,18 @@ public class ReceiptManager : MonoBehaviour
 
     [Header("Game Rules")]
     public int budgetCents = 3000;
+    public int requiredItems = 5;
 
     public int TotalCents { get; private set; }
     public int ItemCount { get; private set; }
+
     public bool IsGameOver { get; private set; }
+    public bool HasWon { get; private set; }
+
+    public bool CanCheckout =>
+        !IsGameOver &&
+        ItemCount >= requiredItems &&
+        TotalCents <= budgetCents;
 
     private void Start()
     {
@@ -52,20 +60,39 @@ public class ReceiptManager : MonoBehaviour
         );
     }
 
+    public void TryCheckout()
+    {
+        if (!CanCheckout)
+        {
+            return;
+        }
+
+        HasWon = true;
+        IsGameOver = true;
+
+        UpdateUI();
+    }
+
     public void ResetReceipt()
     {
         TotalCents = 0;
         ItemCount = 0;
         IsGameOver = false;
+        HasWon = false;
 
         UpdateUI();
     }
 
     private void RestartGame()
     {
+        ResetReceipt();
+
         Snake snake = FindFirstObjectByType<Snake>();
 
-        snake.ResetState();
+        if (snake != null)
+        {
+            snake.ResetState();
+        }
 
         Food food = FindFirstObjectByType<Food>();
 
@@ -82,14 +109,24 @@ public class ReceiptManager : MonoBehaviour
             totalText.text =
                 "TOTAL: $" + (TotalCents / 100f).ToString("0.00");
 
-            totalText.color = IsGameOver
-                ? new Color(1f, 0.4f, 0.4f)
-                : new Color(0.96f, 0.93f, 0.86f);
+            if (HasWon)
+            {
+                totalText.color = new Color(0.4f, 0.85f, 0.55f);
+            }
+            else if (IsGameOver)
+            {
+                totalText.color = new Color(1f, 0.4f, 0.4f);
+            }
+            else
+            {
+                totalText.color = new Color(0.96f, 0.93f, 0.86f);
+            }
         }
 
         if (itemsText != null)
         {
-            itemsText.text = "ITEMS: " + ItemCount;
+            itemsText.text =
+                "ITEMS: " + ItemCount + " / " + requiredItems;
         }
 
         if (budgetText != null)
@@ -100,9 +137,27 @@ public class ReceiptManager : MonoBehaviour
 
         if (statusText != null)
         {
-            statusText.text = IsGameOver
-                ? "OVER BUDGET! Press R to restart."
-                : "Collect products. Stay within budget.";
-        }
+            if (HasWon)
+            {
+                statusText.text =
+                    "CHECKOUT COMPLETE! Press R to shop again.";
+            }
+            else if (IsGameOver)
+            {
+                statusText.text =
+                    "OVER BUDGET! Press R to restart.";
+            }
+            else if (CanCheckout)
+            {
+                statusText.text =
+                    "Checkout is OPEN! Head to the green square.";
+            }
+            else
+            {
+                statusText.text =
+                    "Buy " + requiredItems +
+                    " items, then reach checkout.";
+            }
+         }
     }
 }
