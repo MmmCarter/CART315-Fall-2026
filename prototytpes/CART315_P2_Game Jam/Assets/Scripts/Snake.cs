@@ -96,6 +96,13 @@ public class Snake : MonoBehaviour
         for (int i = 0; i < initialSize - 1; i++) {
             Grow();
         }
+
+        ReceiptManager receipt = FindFirstObjectByType<ReceiptManager>();
+
+        if (receipt != null)
+        {
+            receipt.ResetReceipt();
+        }
     }
 
     public bool Occupies(int x, int y)

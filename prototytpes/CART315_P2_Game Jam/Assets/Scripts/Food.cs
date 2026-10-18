@@ -120,6 +120,13 @@ public class Food : MonoBehaviour
             return;
         }
 
+        ReceiptManager receipt = FindFirstObjectByType<ReceiptManager>();
+
+        if (receipt != null)
+        {
+            receipt.AddPurchase(ProductName, PriceCents);
+        }
+
         Debug.Log(
             "Purchased: " + ProductName +
             " | Price: $" + (PriceCents / 100f).ToString("0.00")
