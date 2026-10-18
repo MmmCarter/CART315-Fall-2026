@@ -44,6 +44,13 @@ public class Snake : MonoBehaviour
 
     private void FixedUpdate()
     {
+        ReceiptManager receipt = FindFirstObjectByType<ReceiptManager>();
+
+        if (receipt != null && receipt.IsGameOver)
+        {
+            return;
+        }
+
         // Wait until the next update before proceeding
         if (Time.time < nextUpdate) {
             return;
@@ -81,23 +88,31 @@ public class Snake : MonoBehaviour
     public void ResetState()
     {
         direction = Vector2Int.right;
+        input = Vector2Int.zero;
+        nextUpdate = Time.time + 0.5f;
         transform.position = Vector3.zero;
 
-        // Start at 1 to skip destroying the head
-        for (int i = 1; i < segments.Count; i++) {
+        for (int i = 1; i < segments.Count; i++)
+        {
+            segments[i].gameObject.SetActive(false);
             Destroy(segments[i].gameObject);
         }
 
-        // Clear the list but add back this as the head
         segments.Clear();
         segments.Add(transform);
 
-        // -1 since the head is already in the list
-        for (int i = 0; i < initialSize - 1; i++) {
-            Grow();
+        for (int i = 1; i < initialSize; i++)
+        {
+            Transform segment = Instantiate(segmentPrefab);
+
+            segment.position = transform.position
+                - new Vector3(direction.x, direction.y, 0f) * i;
+
+            segments.Add(segment);
         }
 
-        ReceiptManager receipt = FindFirstObjectByType<ReceiptManager>();
+        ReceiptManager receipt =
+            FindFirstObjectByType<ReceiptManager>();
 
         if (receipt != null)
         {
@@ -120,6 +135,13 @@ public class Snake : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        ReceiptManager receipt = FindFirstObjectByType<ReceiptManager>();
+
+        if (receipt != null && receipt.IsGameOver)
+        {
+            return;
+        }
+
         if (other.gameObject.CompareTag("Food"))
         {
             Grow();

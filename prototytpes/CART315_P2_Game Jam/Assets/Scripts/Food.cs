@@ -124,13 +124,19 @@ public class Food : MonoBehaviour
 
         if (receipt != null)
         {
-            receipt.AddPurchase(ProductName, PriceCents);
-        }
+            if (receipt.IsGameOver)
+            {
+                return;
+            }
 
-        Debug.Log(
-            "Purchased: " + ProductName +
-            " | Price: $" + (PriceCents / 100f).ToString("0.00")
-        );
+            receipt.AddPurchase(ProductName, PriceCents);
+
+            // Keep the current item in its position and do not generate the next one if the budget is exceeded.
+            if (receipt.IsGameOver)
+            {
+                return;
+            }
+        }
 
         RandomizePosition();
     }
