@@ -5,6 +5,13 @@ public class Food : MonoBehaviour
 {
     public Collider2D gridArea;
 
+    [Header("Product Sprites")]
+    public Sprite milkSprite;
+    public Sprite breadSprite;
+    public Sprite chipsSprite;
+    public Sprite appleSprite;
+    public Sprite coffeeSprite;
+
     // Information about the current item, used to generate a shopping list.
     public string ProductName { get; private set; }
     public int PriceCents { get; private set; }
@@ -65,13 +72,34 @@ public class Food : MonoBehaviour
         ProductName = productNames[index];
         PriceCents = productPrices[index];
 
-        GetComponent<SpriteRenderer>().color = productColors[index];
+        Sprite[] sprites =
+   {
+        milkSprite,
+        breadSprite,
+        chipsSprite,
+        appleSprite,
+        coffeeSprite
+    };
+
+        SpriteRenderer renderer = GetComponent<SpriteRenderer>();
+
+        renderer.color = Color.white;
+
+        if (sprites[index] != null)
+        {
+            renderer.sprite = sprites[index];
+        }
+        else
+        {
+            Debug.LogWarning("Missing product sprite: " + ProductName);
+        }
 
         productLabel.text =
-            ProductName + "\n$" + (PriceCents / 100f).ToString("0.00");
+            ProductName + "\n$" +
+            (PriceCents / 100f).ToString("0.00");
 
-        // Place the text below the product to avoid obscuring the border.
-        bool nearTop = transform.position.y > gridArea.bounds.max.y - 2f;
+        bool nearTop =
+            transform.position.y > gridArea.bounds.max.y - 2f;
 
         productLabel.transform.localPosition =
             new Vector3(0f, nearTop ? -1.2f : 1.2f, -0.1f);

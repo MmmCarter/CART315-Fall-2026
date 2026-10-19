@@ -153,7 +153,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 330}
   m_SizeDelta: {x: 620, y: 65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &270054284
@@ -1980,6 +1980,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridArea: {fileID: 864387895}
+  milkSprite: {fileID: 21300000, guid: eb65eecfc34fa514896ddcec66cc7889, type: 3}
+  breadSprite: {fileID: 21300000, guid: 5d504914d56efcb459b381ff4513e0f2, type: 3}
+  chipsSprite: {fileID: 21300000, guid: 8bdab26998a76a14ca04cb46110a35c0, type: 3}
+  appleSprite: {fileID: 21300000, guid: 59cdc006518711742aef3a03683de02a, type: 3}
+  coffeeSprite: {fileID: 21300000, guid: 3139c97cbc713b64cadab72ffd4fa5fa, type: 3}
 --- !u!1 &1431457602
 GameObject:
   m_ObjectHideFlags: 0
@@ -2368,6 +2373,8 @@ MonoBehaviour:
   statusText: {fileID: 930804541}
   budgetCents: 3000
   requiredItems: 5
+  receiptPanel: {fileID: 1591232615}
+  receiptBody: {fileID: 1309403760}
 --- !u!4 &1820950337
 Transform:
   m_ObjectHideFlags: 0
