@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Text;
 
 public class ReceiptManager : MonoBehaviour
 {
@@ -24,6 +26,12 @@ public class ReceiptManager : MonoBehaviour
         ItemCount >= requiredItems &&
         TotalCents <= budgetCents;
 
+    [Header("Receipt Panel")]
+    public GameObject receiptPanel;
+    public TMP_Text receiptBody;
+
+    private readonly List<string> purchaseLines = new List<string>();
+
     private void Start()
     {
         UpdateUI();
@@ -46,6 +54,10 @@ public class ReceiptManager : MonoBehaviour
 
         TotalCents += priceCents;
         ItemCount++;
+            purchaseLines.Add(
+        productName + "    $" +
+        (priceCents / 100f).ToString("0.00")
+        );
 
         if (TotalCents > budgetCents)
         {
@@ -53,6 +65,11 @@ public class ReceiptManager : MonoBehaviour
         }
 
         UpdateUI();
+
+        if (IsGameOver)
+        {
+            ShowReceipt();
+        }
 
         Debug.Log(
             "Purchased: " + productName +
@@ -71,14 +88,28 @@ public class ReceiptManager : MonoBehaviour
         IsGameOver = true;
 
         UpdateUI();
+        ShowReceipt();
     }
 
     public void ResetReceipt()
     {
         TotalCents = 0;
         ItemCount = 0;
+
         IsGameOver = false;
         HasWon = false;
+
+        purchaseLines.Clear();
+
+        if (receiptBody != null)
+        {
+            receiptBody.text = "";
+        }
+
+        if (receiptPanel != null)
+        {
+            receiptPanel.SetActive(false);
+        }
 
         UpdateUI();
     }
@@ -99,6 +130,68 @@ public class ReceiptManager : MonoBehaviour
         if (food != null)
         {
             food.RandomizePosition();
+        }
+    }
+
+    private void ShowReceipt()
+    {
+        StringBuilder receipt = new StringBuilder();
+
+        receipt.AppendLine("Inspired by everyday shopping receipts");
+        receipt.AppendLine("--------------------------------");
+        receipt.AppendLine();
+
+        for (int i = 0; i < purchaseLines.Count; i++)
+        {
+            receipt.AppendLine(
+                (i + 1) + ". " + purchaseLines[i]
+            );
+        }
+
+        receipt.AppendLine();
+        receipt.AppendLine("--------------------------------");
+        receipt.AppendLine("ITEMS: " + ItemCount);
+
+        receipt.AppendLine(
+            "TOTAL: $" + (TotalCents / 100f).ToString("0.00")
+        );
+
+        receipt.AppendLine(
+            "BUDGET: $" + (budgetCents / 100f).ToString("0.00")
+        );
+
+        int remainingCents = budgetCents - TotalCents;
+
+        if (remainingCents >= 0)
+        {
+            receipt.AppendLine(
+                "REMAINING: $" +
+                (remainingCents / 100f).ToString("0.00")
+            );
+        }
+        else
+        {
+            receipt.AppendLine(
+                "OVER BUDGET BY: $" +
+                (-remainingCents / 100f).ToString("0.00")
+            );
+        }
+
+        receipt.AppendLine();
+        receipt.AppendLine(
+            HasWon ? "THANK YOU FOR SHOPPING!" : "TOO MUCH SHOPPING!"
+        );
+
+        receipt.AppendLine("Press R to shop again.");
+
+        if (receiptBody != null)
+        {
+            receiptBody.text = receipt.ToString();
+        }
+
+        if (receiptPanel != null)
+        {
+            receiptPanel.SetActive(true);
         }
     }
 
