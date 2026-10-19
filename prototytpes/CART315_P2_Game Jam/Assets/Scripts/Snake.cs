@@ -12,6 +12,8 @@ public class Snake : MonoBehaviour
     public bool moveThroughWalls = false;
 
     private readonly List<Transform> segments = new List<Transform>();
+
+    public IReadOnlyList<Transform> Segments => segments;
     private Vector2Int input;
     private float nextUpdate;
 
