@@ -9,7 +9,6 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Game References")]
     public Snake snake;
-    public Food food;
 
     private bool gameStarted;
 
@@ -37,11 +36,6 @@ public class MainMenuController : MonoBehaviour
         if (snake != null)
         {
             snake.ResetState();
-        }
-
-        if (food != null)
-        {
-            food.RandomizePosition();
         }
 
         mainMenuRoot.SetActive(false);

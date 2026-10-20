@@ -112,24 +112,22 @@ public class ReceiptManager : MonoBehaviour
         }
 
         UpdateUI();
+
+        FoodSpawner spawner = FindFirstObjectByType<FoodSpawner>();
+
+        if (spawner != null)
+        {
+            spawner.StartRun();
+        }
     }
 
     private void RestartGame()
     {
-        ResetReceipt();
-
         Snake snake = FindFirstObjectByType<Snake>();
 
         if (snake != null)
         {
             snake.ResetState();
-        }
-
-        Food food = FindFirstObjectByType<Food>();
-
-        if (food != null)
-        {
-            food.RandomizePosition();
         }
     }
 

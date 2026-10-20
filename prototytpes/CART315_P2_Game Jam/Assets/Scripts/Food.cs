@@ -1,53 +1,35 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(BoxCollider2D))]
 public class Food : MonoBehaviour
 {
-    public Collider2D gridArea;
-
-    [Header("Product Sprites")]
-    public Sprite milkSprite;
-    public Sprite breadSprite;
-    public Sprite chipsSprite;
-    public Sprite appleSprite;
-    public Sprite coffeeSprite;
-
-    // Information about the current item, used to generate a shopping list.
     public string ProductName { get; private set; }
     public int PriceCents { get; private set; }
 
-    private Snake snake;
-    private TextMesh productLabel;
+    private FoodSpawner spawner;
 
-    private readonly string[] productNames =
+    public void Initialize(
+        FoodSpawner owner,
+        string productName,
+        int priceCents,
+        Sprite sprite)
     {
-        "MILK", "BREAD", "CHIPS", "APPLE", "COFFEE"
-    };
+        spawner = owner;
+        ProductName = productName;
+        PriceCents = priceCents;
 
-    // Use whole numbers to represent cents (350 represents $3.50).
-    private readonly int[] productPrices =
-    {
-        350, 250, 400, 150, 600
-    };
+        SpriteRenderer renderer = GetComponent<SpriteRenderer>();
+        renderer.sprite = sprite;
+        renderer.color = Color.white;
+        renderer.sortingOrder = 2;
 
-    private readonly Color[] productColors =
-    {
-        new Color(0.65f, 0.82f, 0.92f),
-        new Color(0.87f, 0.68f, 0.40f),
-        new Color(0.92f, 0.50f, 0.30f),
-        new Color(0.60f, 0.80f, 0.35f),
-        new Color(0.65f, 0.46f, 0.32f)
-    };
+        BoxCollider2D trigger = GetComponent<BoxCollider2D>();
+        trigger.isTrigger = true;
+        trigger.offset = Vector2.zero;
+        trigger.size = new Vector2(0.65f, 0.65f);
 
-    private void Awake()
-    {
-        snake = FindFirstObjectByType<Snake>();
-    }
-
-    private void Start()
-    {
         CreateLabel();
-        RandomizePosition();
     }
 
     private void CreateLabel()
@@ -55,127 +37,31 @@ public class Food : MonoBehaviour
         GameObject labelObject = new GameObject("Product Label");
         labelObject.transform.SetParent(transform, false);
 
-        productLabel = labelObject.AddComponent<TextMesh>();
-        productLabel.anchor = TextAnchor.MiddleCenter;
-        productLabel.alignment = TextAlignment.Center;
-        productLabel.fontSize = 48;
-        productLabel.characterSize = 0.1f;
-        productLabel.color = Color.white;
+        TextMesh label = labelObject.AddComponent<TextMesh>();
+        label.anchor = TextAnchor.MiddleCenter;
+        label.alignment = TextAlignment.Center;
+        label.fontSize = 48;
+        label.characterSize = 0.08f;
+        label.color = Color.white;
 
-        labelObject.GetComponent<MeshRenderer>().sortingOrder = 10;
-    }
+        label.text = "$" + (PriceCents / 100f).ToString("0.00");
 
-    private void RandomizeProduct()
-    {
-        int index = Random.Range(0, productNames.Length);
+        labelObject.transform.localPosition =
+            new Vector3(0f, 0.65f, -0.1f);
 
-        ProductName = productNames[index];
-        PriceCents = productPrices[index];
-
-        Sprite[] sprites =
-   {
-        milkSprite,
-        breadSprite,
-        chipsSprite,
-        appleSprite,
-        coffeeSprite
-    };
-
-        SpriteRenderer renderer = GetComponent<SpriteRenderer>();
-
-        renderer.color = Color.white;
-
-        if (sprites[index] != null)
-        {
-            renderer.sprite = sprites[index];
-        }
-        else
-        {
-            Debug.LogWarning("Missing product sprite: " + ProductName);
-        }
-
-        productLabel.text =
-            ProductName + "\n$" +
-            (PriceCents / 100f).ToString("0.00");
-
-        bool nearTop =
-            transform.position.y > gridArea.bounds.max.y - 2f;
-
-        productLabel.transform.localPosition =
-            new Vector3(0f, nearTop ? -1.2f : 1.2f, -0.1f);
-    }
-
-    public void RandomizePosition()
-    {
-        Bounds bounds = gridArea.bounds;
-
-        int minX = Mathf.CeilToInt(bounds.min.x);
-        int maxX = Mathf.FloorToInt(bounds.max.x);
-        int minY = Mathf.CeilToInt(bounds.min.y);
-        int maxY = Mathf.FloorToInt(bounds.max.y);
-
-        // Collect the squares not occupied by tickets, and make sure items don't spawn on the snake.
-        var freeCells = new System.Collections.Generic.List<Vector2Int>();
-
-        CheckoutPoint checkout = FindFirstObjectByType<CheckoutPoint>();
-
-        Collider2D checkoutCollider = checkout != null
-            ? checkout.GetComponent<Collider2D>()
-            : null;
-
-        for (int y = minY; y <= maxY; y++)
-        {
-            for (int x = minX; x <= maxX; x++)
-            {
-                bool insideCheckout = checkoutCollider != null &&
-    checkoutCollider.OverlapPoint(new Vector2(x, y));
-
-                if (!snake.Occupies(x, y) && !insideCheckout)
-                {
-                    freeCells.Add(new Vector2Int(x, y));
-                }
-            }
-        }
-
-        if (freeCells.Count == 0)
-        {
-            gameObject.SetActive(false);
-            return;
-        }
-
-        Vector2Int cell = freeCells[Random.Range(0, freeCells.Count)];
-        transform.position = new Vector3(cell.x, cell.y, 0f);
-
-        RandomizeProduct();
+        labelObject.GetComponent<MeshRenderer>().sortingOrder = 5;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Items can only be picked up from the head of the receipt.
         if (other.GetComponent<Snake>() == null)
         {
             return;
         }
 
-        ReceiptManager receipt = FindFirstObjectByType<ReceiptManager>();
-
-        if (receipt != null)
+        if (spawner != null)
         {
-            if (receipt.IsGameOver)
-            {
-                return;
-            }
-
-            receipt.AddPurchase(ProductName, PriceCents);
-
-            // Keep the current item in its position and do not generate the next one if the budget is exceeded.
-            if (receipt.IsGameOver)
-            {
-                return;
-            }
+            spawner.TryCollect(this);
         }
-
-        RandomizePosition();
     }
-
 }

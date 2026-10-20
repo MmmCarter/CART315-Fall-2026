@@ -146,7 +146,7 @@ public class Snake : MonoBehaviour
 
         if (other.gameObject.CompareTag("Food"))
         {
-            Grow();
+            return;
         }
         else if (other.gameObject.CompareTag("Obstacle"))
         {
