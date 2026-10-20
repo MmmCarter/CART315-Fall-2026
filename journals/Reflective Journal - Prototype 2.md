@@ -1,0 +1,22 @@
+Date: October 19, 2026
+
+For prototype 2 I chose to use Snake as my template. I used to play this iconic game on my mother’s Nokia flip phone back when smartphones hadn’t even been invented yet. I named my improved version “Receipt Run.”  This version was inspired by my receipts from shopping at Costco and my impulse to buy things. Whenever I go shopping, I usually have a budget in mind, but when I get to the checkout, I always find that I’ve bought way more than I intended and completely exceeded my budget. The receipt gets longer as you buy more items, which is directly linked to the mechanism in Snake where the snake grows longer after eating food; therefore, I think this inspiration could be incorporated into the gameplay itself.
+
+First, I changed the green snake to a white strip of paper and changed food to 5 different products then set different prices for them, then created an interface to display the total amount and the number of items purchased. I then added a checkout counter that becomes available after the player has consumed five items. To complete the game, players must reach the checkout counter and pay for their purchases without exceeding their budget. I also created a receipt-style settlement panel that lists the purchased items, their unit prices, and the total amount. In this way, the receipt serves both as the player’s avatar and as a record of their actions during the game. 
+
+The item generation mechanism underwent further adjustments. Initially, there was only one item on the screen; later, I changed it so that two to three items would appear randomly each round, allowing players to choose which ones to buy. After eating the fifth item, a large number of items would appear on the map. At this point, the items had become obstacles—things to avoid on the way to the checkout counter—while the remaining budget could cover the cost of accidentally eating a few of them. 
+
+Visually, I incorporated colorful pixelated product images, a cash register icon and a consistent font, and redesigned the snake‘s body to resemble a continuous paper tape featuring printed patterns, barcodes and torn edges. A title screen with Start Game and Instructions buttons established an entry point before movement begins.
+
+In this design, the most direct link between inspiration and gameplay is the concept that accumulation leads to constraints. Every purchase increases both the total amount spent and the space taken up by receipts. Consequently, the consequences of spending are reflected not only in the numbers but also in the player’s increasingly difficult-to-control movement path.
+
+The budget gives players a reason to evaluate items, but when there is only one item available, the scope for choice remains limited. It is only when multiple options are presented that the price information becomes truly useful: players can choose the cheapest item, the one that is easiest to reach, or the route with the lowest risk of collision. 
+
+The checkout phase, however, alters the significance of the same objects. When fewer than five items are purchased, the goods help the player progress towards their objective; once five items are reached, they begin to threaten the remaining budget and increase the difficulty of navigation. Players do not need to learn new actions, yet the objective shifts from collection to restraint. Consequently, spending choices made in the first half of the game may influence the difficulty of reaching the checkout at the end.
+
+But a more crowded map does not necessarily equate to a better challenge. Random generation may result in uneven difficulty levels, or even create routes that can only be completed by purchasing additional items. I still need to ascertain whether players will perceive these situations as a meaningful trade-off or an unavoidable penalty. The relationship between item density, movement speed and remaining budget still requires further testing.
+
+Perhaps I’ll let new players have a go at the game after simply reading the instructions, to see whether they compare prices, whether they know when the till opens, and whether they understand why they need to dodge the goods in the final stage. But all in all, this journal outlines the development process of the prototype; brief notes taken during the production phase allow for a clearer distinction to be drawn between my design intentions and the results actually demonstrated by the tests.
+
+
+
