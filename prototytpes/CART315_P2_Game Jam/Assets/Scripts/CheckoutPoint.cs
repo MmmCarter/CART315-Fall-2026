@@ -21,7 +21,7 @@ public class CheckoutPoint : MonoBehaviour
         }
 
         spriteRenderer.color = receipt.CanCheckout
-            ? new Color(0.4f, 0.85f, 0.55f)
+            ? Color.white
             : new Color(0.45f, 0.45f, 0.45f);
     }
 

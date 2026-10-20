@@ -243,7 +243,7 @@ public class ReceiptManager : MonoBehaviour
             else if (CanCheckout)
             {
                 statusText.text =
-                    "Checkout is OPEN! Head to the green square.";
+                    "Checkout is OPEN! Head to the cashier.";
             }
             else
             {
