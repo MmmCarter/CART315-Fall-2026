@@ -2183,7 +2183,7 @@ MonoBehaviour:
   speed: 8
   speedMultiplier: 1
   initialSize: 4
-  moveThroughWalls: 1
+  moveThroughWalls: 0
 --- !u!50 &1161375265
 Rigidbody2D:
   serializedVersion: 5
