@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using TMPro;
 
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(BoxCollider2D))]
@@ -6,6 +7,9 @@ public class Food : MonoBehaviour
 {
     public string ProductName { get; private set; }
     public int PriceCents { get; private set; }
+
+    [Header("Price Label")]
+    public TMP_FontAsset priceFont;
 
     private FoodSpawner spawner;
 
@@ -37,14 +41,20 @@ public class Food : MonoBehaviour
         GameObject labelObject = new GameObject("Product Label");
         labelObject.transform.SetParent(transform, false);
 
-        TextMesh label = labelObject.AddComponent<TextMesh>();
-        label.anchor = TextAnchor.MiddleCenter;
-        label.alignment = TextAlignment.Center;
-        label.fontSize = 48;
-        label.characterSize = 0.08f;
-        label.color = Color.white;
+        TextMeshPro label = labelObject.AddComponent<TextMeshPro>();
+
+        if (priceFont != null)
+        {
+            label.font = priceFont;
+        }
 
         label.text = "$" + (PriceCents / 100f).ToString("0.00");
+
+        label.fontSize = 3f;
+        label.color = Color.white;
+        label.alignment = TextAlignmentOptions.Center;
+
+        label.rectTransform.sizeDelta = new Vector2(2f, 0.7f);
 
         labelObject.transform.localPosition =
             new Vector3(0f, 0.65f, -0.1f);
