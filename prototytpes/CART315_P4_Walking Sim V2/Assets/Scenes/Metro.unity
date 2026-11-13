@@ -355,6 +355,7 @@ GameObject:
   - component: {fileID: 31973730}
   - component: {fileID: 31973729}
   - component: {fileID: 31973728}
+  - component: {fileID: 31973731}
   m_Layer: 0
   m_Name: MetroCall_A
   m_TagString: Untagged
@@ -455,6 +456,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 31973726}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &31973731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31973726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e79bafcf62a9d714f9a508a2b02bdf39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MetroWaitButton
+  playerCamera: {fileID: 717155200}
+  statusText: {fileID: 1570710562}
+  waitBeforeReply: 1
+  replyDelay: 3
+  interactionDistance: 2.5
 --- !u!1 &61627094
 GameObject:
   m_ObjectHideFlags: 0
@@ -2616,6 +2634,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1508381290}
   m_SourcePrefab: {fileID: 100100000, guid: 92efd63b18b726040a8e16e8643afde0, type: 3}
+--- !u!20 &717155200 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 9200688862863631350, guid: 92efd63b18b726040a8e16e8643afde0, type: 3}
+  m_PrefabInstance: {fileID: 717155199}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &717685882
 GameObject:
   m_ObjectHideFlags: 0
