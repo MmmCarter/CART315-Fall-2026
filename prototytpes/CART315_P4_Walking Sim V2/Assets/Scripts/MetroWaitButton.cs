@@ -19,7 +19,7 @@ public class MetroWaitButton : MonoBehaviour
     private void Start()
     {
         if (playerCamera == null) playerCamera = Camera.main;
-        if (statusText != null) statusText.text = "METRO SERVICE\nPRESS E";
+        if (statusText != null) statusText.text = "METRO SERVICE";
     }
 
     private bool IsTargeted()
