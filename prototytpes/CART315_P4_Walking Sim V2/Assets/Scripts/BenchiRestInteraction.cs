@@ -1,3 +1,4 @@
+using System.Collections;
 using Cart315.FirstPerson;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,6 +12,7 @@ public class BenchRestInteraction : MonoBehaviour
     [SerializeField, Min(0.1f)] private float interactionDistance = 2.5f;
     [SerializeField, Min(0.1f)] private float seatedEyeHeight = 1.15f;
     [SerializeField, Min(0.001f)] private float lookSensitivity = 0.05f;
+    [SerializeField, Min(0f)] private float transitionDuration = 0.5f;
 
     private CharacterController characterController;
     private Transform cameraPivot;
@@ -21,7 +23,12 @@ public class BenchRestInteraction : MonoBehaviour
     private Quaternion standingRotation;
     private Vector3 standingPivotPosition;
     private Quaternion standingPivotRotation;
+    private Vector3 standingViewPosition;
+    private Quaternion standingViewRotation;
     private bool seated;
+    private bool transitioning;
+    private bool controlsSuspended;
+    private Coroutine transitionRoutine;
     private float yaw;
     private float pitch;
     private GUIStyle promptStyle;
@@ -69,7 +76,7 @@ public class BenchRestInteraction : MonoBehaviour
 
     private void Update()
     {
-        if (seated)
+        if (controlsSuspended)
         {
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
@@ -85,7 +92,10 @@ public class BenchRestInteraction : MonoBehaviour
                 return;
             }
 
-            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            // Ignore repeated interaction presses until the transition ends.
+            if (transitioning) return;
+
+            if (seated && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
                 StandUp();
             return;
         }
@@ -96,7 +106,7 @@ public class BenchRestInteraction : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!seated || Mouse.current == null || Cursor.lockState != CursorLockMode.Locked)
+        if (!seated || transitioning || Mouse.current == null || Cursor.lockState != CursorLockMode.Locked)
             return;
 
         Vector2 delta = Mouse.current.delta.ReadValue();
@@ -107,11 +117,16 @@ public class BenchRestInteraction : MonoBehaviour
 
     private void SitDown()
     {
+        if (controlsSuspended || transitioning) return;
+
         standingPosition = player.transform.position;
         standingRotation = player.transform.rotation;
         standingPivotPosition = cameraPivot.localPosition;
         standingPivotRotation = cameraPivot.localRotation;
+        standingViewPosition = cameraPivot.position;
+        standingViewRotation = cameraPivot.rotation;
         previousControllerEnabled = characterController.enabled;
+        controlsSuspended = true;
 
         for (int i = 0; i < movementComponents.Length; i++)
         {
@@ -122,18 +137,72 @@ public class BenchRestInteraction : MonoBehaviour
         }
 
         characterController.enabled = false;
-        player.transform.SetPositionAndRotation(sitPoint.position, sitPoint.rotation);
-        cameraPivot.localPosition = new Vector3(0f, seatedEyeHeight, 0f);
-        cameraPivot.localRotation = Quaternion.identity;
-        yaw = pitch = 0f;
-        seated = true;
+        cameraPivot.SetPositionAndRotation(standingViewPosition, standingViewRotation);
         CaptureCursor();
+        transitionRoutine = StartCoroutine(TransitionTo(true));
     }
 
     private void StandUp()
     {
-        if (!seated) return;
+        if (!seated || transitioning) return;
+        transitionRoutine = StartCoroutine(TransitionTo(false));
+    }
+
+    private IEnumerator TransitionTo(bool sittingDown)
+    {
+        transitioning = true;
+
+        Vector3 rootStart = player.transform.position;
+        Quaternion rootStartRotation = player.transform.rotation;
+        Vector3 viewStart = cameraPivot.position;
+        Quaternion viewStartRotation = cameraPivot.rotation;
+
+        Vector3 rootTarget = sittingDown ? sitPoint.position : standingPosition;
+        Quaternion rootTargetRotation = sittingDown ? sitPoint.rotation : standingRotation;
+        Vector3 viewTarget = sittingDown
+            ? rootTarget + rootTargetRotation * new Vector3(0f, seatedEyeHeight, 0f)
+            : standingViewPosition;
+        Quaternion viewTargetRotation = sittingDown ? rootTargetRotation : standingViewRotation;
+
+        float elapsed = 0f;
+        float duration = transitionDuration;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = t * t * (3f - 2f * t);
+
+            player.transform.SetPositionAndRotation(
+                Vector3.Lerp(rootStart, rootTarget, eased),
+                Quaternion.Slerp(rootStartRotation, rootTargetRotation, eased));
+
+            cameraPivot.SetPositionAndRotation(
+                Vector3.Lerp(viewStart, viewTarget, eased),
+                Quaternion.Slerp(viewStartRotation, viewTargetRotation, eased));
+            yield return null;
+        }
+
+        player.transform.SetPositionAndRotation(rootTarget, rootTargetRotation);
+        if (sittingDown)
+        {
+            cameraPivot.localPosition = new Vector3(0f, seatedEyeHeight, 0f);
+            cameraPivot.localRotation = Quaternion.identity;
+            yaw = pitch = 0f;
+            seated = true;
+        }
+        else
+        {
+            RestoreStandingState();
+        }
+
+        transitioning = false;
+        transitionRoutine = null;
+    }
+
+    private void RestoreStandingState()
+    {
         seated = false;
+        controlsSuspended = false;
 
         if (player != null)
             player.transform.SetPositionAndRotation(standingPosition, standingRotation);
@@ -158,12 +227,16 @@ public class BenchRestInteraction : MonoBehaviour
 
     private void OnDisable()
     {
-        if (seated) StandUp();
+        if (transitionRoutine != null)
+            StopCoroutine(transitionRoutine);
+        transitionRoutine = null;
+        transitioning = false;
+        if (controlsSuspended) RestoreStandingState();
     }
 
     private void OnGUI()
     {
-        if (!seated && !IsTargeted()) return;
+        if (!controlsSuspended && !IsTargeted()) return;
         if (promptStyle == null)
         {
             promptStyle = new GUIStyle(GUI.skin.label);
@@ -172,7 +245,9 @@ public class BenchRestInteraction : MonoBehaviour
             promptStyle.normal.textColor = Color.white;
         }
 
-        string message = seated
+        string message = transitioning
+            ? (seated ? "Standing up..." : "Sitting down...")
+            : seated
             ? (Cursor.lockState == CursorLockMode.Locked
                 ? "E - Stand up    |    Mouse - Look around" : "Click to continue resting")
             : "E - Sit and rest";
