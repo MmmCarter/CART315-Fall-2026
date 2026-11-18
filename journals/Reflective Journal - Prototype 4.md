@@ -8,3 +8,12 @@ The second enhancement was the ability to sit on the outdoor bench. The bench ha
 
 There are still questions I would like to investigate through play testing. The buttons suggest that players can take action, but the fixed result could feel frustrating if players expect to summon a metro. The next step is to verify whether these interactions express the shift from expectation to acceptance that I intend to show, rather than just simply confirming the functions.
 
+
+
+# Asset Attribution
+
+## Sounds
+1. Beep_Soft_3.wav
+   Creator: JonnyRuss01
+   Source: https://freesound.org/people/JonnyRuss01/sounds/478188/
+   License: CC0
