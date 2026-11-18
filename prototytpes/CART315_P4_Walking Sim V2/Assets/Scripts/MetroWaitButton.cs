@@ -12,14 +12,36 @@ public class MetroWaitButton : MonoBehaviour
     [SerializeField, Min(0f)] private float replyDelay = 3f;
     [SerializeField, Min(0.1f)] private float interactionDistance = 2.5f;
 
+    [Header("Button Audio")]
+    [SerializeField] private AudioSource buttonAudio;
+    [SerializeField] private AudioClip pressSound;
+    [SerializeField, Range(0f, 1f)] private float pressVolume = 0.3f;
+    [SerializeField, Min(0.05f)] private float pressCooldown = 0.25f;
+
+    [Header("Display Colors")]
+    [SerializeField] private Color idleColor = new Color(1f, 0.78f, 0.42f);
+    [SerializeField] private Color waitingColor = new Color(1f, 0.9f, 0.65f);
+    [SerializeField] private Color endedColor = new Color(1f, 0.58f, 0.4f);
+
     private bool requested;
     private bool waiting;
     private GUIStyle promptStyle;
+    private float nextPressTime;
 
     private void Start()
     {
         if (playerCamera == null) playerCamera = Camera.main;
-        if (statusText != null) statusText.text = "METRO SERVICE";
+        if (buttonAudio == null) buttonAudio = GetComponent<AudioSource>();
+        if (buttonAudio == null) buttonAudio = gameObject.AddComponent<AudioSource>();
+        buttonAudio.playOnAwake = false;
+        buttonAudio.loop = false;
+        buttonAudio.spatialBlend = 1f;
+        buttonAudio.rolloffMode = AudioRolloffMode.Linear;
+        buttonAudio.minDistance = 1f;
+        buttonAudio.maxDistance = 7f;
+        buttonAudio.dopplerLevel = 0f;
+        buttonAudio.volume = 1f;
+        SetDisplay("SERVICE INFORMATION", idleColor);
     }
 
     private bool IsTargeted()
@@ -35,9 +57,23 @@ public class MetroWaitButton : MonoBehaviour
 
     private void Update()
     {
-        if (requested || Keyboard.current == null || !IsTargeted()) return;
-        if (Keyboard.current.eKey.wasPressedThisFrame)
-            StartCoroutine(RequestService());
+        if (Keyboard.current == null || !IsTargeted()) return;
+        if (!Keyboard.current.eKey.wasPressedThisFrame || Time.unscaledTime < nextPressTime)
+            return;
+
+        nextPressTime = Time.unscaledTime + pressCooldown;
+        if (buttonAudio != null && pressSound != null)
+            buttonAudio.PlayOneShot(pressSound, pressVolume);
+
+        // Later presses still give audio feedback, but never restart the request.
+        if (!requested) StartCoroutine(RequestService());
+    }
+
+    private void SetDisplay(string message, Color color)
+    {
+        if (statusText == null) return;
+        statusText.text = message;
+        statusText.color = color;
     }
 
     private IEnumerator RequestService()
@@ -47,13 +83,12 @@ public class MetroWaitButton : MonoBehaviour
 
         if (waitBeforeReply)
         {
-            if (statusText != null) statusText.text = "PLEASE WAIT...";
+            SetDisplay("REQUEST RECEIVED\nPLEASE WAIT...", waitingColor);
             yield return new WaitForSeconds(replyDelay);
         }
 
         waiting = false;
-        if (statusText != null)
-            statusText.text = "SERVICE ENDED\nPLEASE USE THE EXIT";
+        SetDisplay("SERVICE ENDED\nPLEASE USE THE EXIT", endedColor);
     }
 
     private void OnGUI()
