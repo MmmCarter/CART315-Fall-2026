@@ -141,6 +141,44 @@ namespace Cart315.FirstPerson
         {
             UpdateCamera();
         }
+
+        public void ResetPlayerState(Vector3 position, Quaternion rotation)
+        {
+            // Temporarily disable the controller
+            _controller.enabled = false;
+
+            // Restore player's position and rotation
+            transform.SetPositionAndRotation(position, rotation);
+
+            // Clear movement
+            Velocity = Vector3.zero;
+            _moveDirection = Vector3.zero;
+            _lastMoveDirection = Vector3.zero;
+
+            _movementSpeedMultiplier = 1f;
+            GroundDistanceThisFrame = 0f;
+
+            // Clear jumping
+            _wasGrounded = false;
+            _isJumping = false;
+            _isOnSlope = false;
+            _isSliding = false;
+            _didSphereCast = false;
+            _slopeHit = default;
+
+            // Restore camera direction
+            _lookDirection = new Vector2(
+                transform.localEulerAngles.y,
+                0f
+            );
+
+            // Restore camera's vertical
+            _cameraHolderTransform.localRotation =
+                Quaternion.identity;
+
+            // Enable the controller again
+            _controller.enabled = true;
+        }
         #endregion
 
         #region Private Methods
