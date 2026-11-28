@@ -12,6 +12,7 @@ public class LoopManager : MonoBehaviour
 
     [Header("Player")]
     public PlayerReset playerReset;
+    public PlayerInteraction playerInteraction;
 
     [Header("Resettable Objects")]
     public ResettableObject[] resettableObjects;
@@ -22,7 +23,9 @@ public class LoopManager : MonoBehaviour
 
     [Header("UI Colors")]
     public Color normalColor = Color.white;
-    public Color warningColor = new Color(1f, 0.255f, 0.255f);
+
+    public Color warningColor =
+        new Color(1f, 0.255f, 0.255f);
 
     private float remainingTime;
     private int loopCount = 1;
@@ -35,19 +38,30 @@ public class LoopManager : MonoBehaviour
     {
         if (playerReset == null)
         {
-            Debug.LogError("Player Reset is not assigned!", this);
+            Debug.LogError(
+                "Player Reset is not assigned!",
+                this
+            );
+
             enabled = false;
             return;
         }
 
+        // Automatically locate Player Interaction
+        if (playerInteraction == null)
+        {
+            playerInteraction =
+                playerReset.GetComponent<PlayerInteraction>();
+        }
+
         remainingTime = loopDuration;
+
         UpdateUI();
     }
 
     private void LateUpdate()
     {
-        // Wait until the player captures the mouse
-        // Pause the countdown when control is released
+        // Pause when player has no control
         if (!playerReset.HasControl)
         {
             return;
@@ -76,12 +90,20 @@ public class LoopManager : MonoBehaviour
 
     public void ResetLoop()
     {
+        // Release held objects before teleporting
+        if (playerInteraction != null)
+        {
+            playerInteraction.ResetInteraction();
+        }
+
+        // Restore player
         playerReset.ResetPlayer();
 
-        // Reset all non-anchored objects
+        // Restore all non-anchored objects
         if (resettableObjects != null)
         {
-            foreach (ResettableObject obj in resettableObjects)
+            foreach (ResettableObject obj
+                in resettableObjects)
             {
                 if (obj != null)
                 {
@@ -98,12 +120,13 @@ public class LoopManager : MonoBehaviour
 
         UpdateUI();
 
-        Debug.Log("Time reset. Starting Loop " + loopCount);
+        Debug.Log(
+            "Time reset. Starting Loop " + loopCount
+        );
     }
 
     private void UpdateUI()
     {
-        // Display remaining time
         if (timerText != null)
         {
             int seconds = Mathf.CeilToInt(
@@ -122,10 +145,10 @@ public class LoopManager : MonoBehaviour
                 : normalColor;
         }
 
-        // Display loop number
         if (loopText != null)
         {
-            loopText.text = $"LOOP {loopCount:000}";
+            loopText.text =
+                $"LOOP {loopCount:000}";
         }
     }
 }
